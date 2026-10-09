@@ -1,0 +1,13 @@
+# runtime files written next to the tool
+logs/
+Captures/
+*Launch.json
+PcBuilds.json
+PcCaptureAudio.txt
+PcCaptureMonitor.txt
+PcCopyLastFolder.txt
+Learned_MACs.csv
+
+# ffmpeg is downloaded separately
+ffmpeg.exe
+ffmpeg/

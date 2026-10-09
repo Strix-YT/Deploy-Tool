@@ -1,0 +1,229 @@
+{
+  "_readme": "Edit in Notepad. Placeholders in Args: {IP} {Name} {BuildPath} plus any key under that platform's Values. Set Exe to an empty string to disable a step. Use Preview Commands in the app after every change.",
+  "_consoleList": "Leave ConsoleList empty to use Console_IP_List.xlsx in this folder (or Consoles.csv if there is no xlsx). Or set a file name / full path / shared drive path to an .xlsx or .csv, e.g. \\\\server\\QA\\Console_IP_List.xlsx",
+  "ConsoleList": "",
+
+  "MaxParallel": 4,
+  "Cache": {
+    "_readme": "When more than WhenMoreThanKits kits are deployed at once, the build is copied from the NAS to Folder once and every kit is deployed from that copy. Folder \"auto\" = HYDBuildCache on the local drive with the most free space. KeepBuilds = how many recent builds stay cached (older ones are deleted automatically).",
+    "Enabled": true,
+    "WhenMoreThanKits": 5,
+    "Folder": "auto",
+    "KeepBuilds": 2
+  },
+  "_staggerSec": "Default gap in seconds between one kit starting its install and the next (0 = all at once). Also adjustable in the app.",
+  "StaggerSec": 30,
+
+  "Reboot": {
+    "DownGraceSec": 25,
+    "OnlineTimeoutSec": 420,
+    "SettleSec": 45
+  },
+
+  "TargetManager": {
+    "_readme": "PS5 kits from the console list that Target Manager on this PC does not have are added when the list loads (AutoAdd) or with the 'Add PS5 kits to Target Manager' button. Commands: PS5.Steps.TargetList / TargetAdd.",
+    "AutoAdd": true,
+    "StopAfterFailures": 3
+  },
+
+  "PC": {
+    "_readme": "PC tab: writes EA app download overrides. Each ticked offer gets OverrideDownloadPath (full path to its .zip), ServerVersionOverride, OverrideUpToDateStatus=1 and overrideUpToDateAfterInstall=1. Offers with an empty Zip only get the version + up-to-date lines. DownloadPathPrefix is put in front of every path (\"\" for none).",
+    "OverrideFile": "C:\\EADesktopDev\\override.cfg",
+    "DownloadPathPrefix": "file:",
+    "EAAppProcess": "EADesktop",
+    "_copy": "PC Files Final / Files Performance builds are copied with robocopy (CopyThreads = files copied at once). The last folder you chose is remembered in PcCopyLastFolder.txt.",
+    "CopyThreads": 16,
+    "EAAppExe": "C:\\Program Files\\Electronic Arts\\EA Desktop\\EA Desktop\\EADesktop.exe",
+    "DirectInstall": {
+      "_readme": "Install game (direct): extracts the ticked content's ZIPs into InstallDir (main game first), runs Touchup.exe if the build has one, writes these registry values and then the overrides. Runs with administrator rights (one Windows prompt). CleanInstall = empty the folder first. {InstallDir} = the install folder.",
+      "InstallDir": "C:\\Program Files\\EA Games\\Battlefield 6",
+      "CleanInstall": true,
+      "Touchup": {
+        "Enabled": true,
+        "Paths": ["__Installer\\Touchup.exe", "Touchup.exe"],
+        "Args": "install -locale en_US -installPath \"{InstallDir}\" -autoupdate",
+        "TimeoutSec": 120
+      },
+      "Registry": [
+        { "Key": "HKLM\\SOFTWARE\\Electronic Arts\\EA Games\\Battlefield",               "Name": "Install Dir", "Value": "{InstallDir}\\" },
+        { "Key": "HKLM\\SOFTWARE\\WOW6432Node\\Electronic Arts\\EA Games\\Battlefield",   "Name": "Install Dir", "Value": "{InstallDir}\\" },
+        { "Key": "HKLM\\SOFTWARE\\WOW6432Node\\Electronic Arts\\EA Games\\Battlefield 6", "Name": "Install Dir", "Value": "{InstallDir}\\" },
+        { "Key": "HKLM\\SOFTWARE\\WOW6432Node\\Origin Games\\16426154",                    "Name": "InstallDir",  "Value": "{InstallDir}\\" },
+        { "Key": "HKLM\\SOFTWARE\\WOW6432Node\\Origin Games\\16426154",                    "Name": "Installed",   "Value": "true" }
+      ]
+    },
+    "_launch": "Launch game... has one profile per build type. Type = the name in the Build type list (match the Configs names so the header's Config picks it). Folder = Install (the install folder on this tab) or Copied (a loose build copied with Use This Build). Exe = exe file name/path inside the build folder (empty = found automatically: PreferExe names first, then the biggest exe, skipping SkipExe). Args = default launch parameters for that type; {Folder} {Exe} {Cl} {BuildId} {Type} are filled in. What you change in the window (folder, exe, parameters, presets) is remembered per type in PcLaunch.json.",
+    "Launch": {
+      "PreferExe": ["bf6.exe", "bf.exe", "Battlefield6.exe", "Battlefield.exe", "Game.exe"],
+      "SkipExe": "(?i)touchup|cleanup|unins|setup|installer|crash|report|redist|vc_|dxsetup|activation|anticheat",
+      "Profiles": [
+        { "Type": "Combine Retail",    "Folder": "Install", "Exe": "", "Args": "" },
+        { "Type": "Files Final",       "Folder": "Copied",  "Exe": "", "Args": "" },
+        { "Type": "Files Performance", "Folder": "Copied",  "Exe": "", "Args": "" }
+      ]
+    },
+    "_gameExe": "Older setting: exe inside the install folder, used for the installed game's profile when its Exe is empty and nothing is remembered.",
+    "GameExe": "",
+    "_install": "Install button opens InstallUri ({TitleId} = TitleId, {OfferId} = InstallOffer). Uninstall reads Windows' installed-programs entry whose name matches GameNamePattern. Delete game files uses that entry's install folder (or GameFolder if Windows has none), after closing KillProcesses; ClearCacheFolder is optional.",
+    "TitleId": "16426154",
+    "InstallUri": "origin://launchgame/{TitleId}",
+    "InstallOffer": "OFR.50.0005511",
+    "GameNamePattern": "Battlefield",
+    "GameFolder": "",
+    "KillProcesses": ["EADesktop", "EABackgroundService"],
+    "ClearCacheFolder": "%LOCALAPPDATA%\\Electronic Arts\\EA Desktop\\cache",
+    "_content": "Items of the EA app install dialog and the override offers each one needs. An offer listed under several items is needed when any of them is ticked. HdTextures = the matching HD Textures item (no NAS build - always left unticked).",
+    "Content": [
+      { "Name": "Base Game",                   "Required": true, "Offers": ["OFR.50.0005511"] },
+      { "Name": "Battlefield 6 Multiplayer",   "Default": true,  "Offers": ["OFR.50.0005606", "OFR.50.0005607"], "HdTextures": "Battlefield 6 Multiplayer HD Textures" },
+      { "Name": "Battlefield 6 Single Player", "Default": true,  "Offers": ["OFR.50.0005608", "OFR.50.0005607"], "HdTextures": "Battlefield 6 Single Player HD Textures" },
+      { "Name": "Battlefield REDSEC",          "Default": true,  "Offers": ["OFR.50.0005605"],                   "HdTextures": "Battlefield REDSEC HD Textures" }
+    ],
+    "Offers": [
+      { "Id": "OFR.50.0005511", "Name": "Main game",          "Zip": "BattlefieldGameData.zip", "Version": "17.149.22.254",  "Use": true },
+      { "Id": "OFR.50.0005608", "Name": "SAN1 (Single Player)",  "Zip": "BF6_SAN1_DLC.zip",        "Version": "17.153.26.246",  "Use": true },
+      { "Id": "OFR.50.0005607", "Name": "SAN1+SAN2 (MP / SP)",   "Zip": "BF6_SAN1_SAN2_DLC.zip",   "Version": "17.153.86.125",  "Use": true },
+      { "Id": "OFR.50.0005606", "Name": "SAN2 (Multiplayer)",    "Zip": "BF6_SAN2_DLC.zip",        "Version": "17.155.125.215", "Use": true },
+      { "Id": "OFR.50.0005605", "Name": "MARKER (REDSEC)",       "Zip": "BF6_MARKER_DLC.zip",      "Version": "17.153.165.255", "Use": true },
+      { "Id": "OFR.50.0005756", "Name": "Offer 0005756",       "Zip": "",                        "Version": "17.153.187.250", "Use": true }
+    ]
+  },
+
+  "Power": {
+    "_readme": "Power On / Power Off / Restart buttons. Parallel = how many kits at once. Exe \"WOL\" = built-in Wake-on-LAN (needs a MAC column in the console list).",
+    "Parallel": 32,
+    "OnTimeoutSec": 300,
+    "OffTimeoutSec": 120,
+    "_verifyOff": "After Power Off the tool pings the kit to confirm it is off. If kits wake back up because of those pings, set this to false.",
+    "VerifyOffWithPing": true,
+    "_xboxAlwaysOn": "Xbox kits with AlwaysOn=true power straight back on after Power Off. true = the tool sets AlwaysOn=false on the kit first so it stays off (it then cannot be powered on remotely). false = leave the kit setting alone and report BACK ON.",
+    "XboxTurnOffAlwaysOn": false,
+    "WolBroadcast": ["255.255.255.255"]
+  },
+
+  "Capture": {
+    "_readme": "Screenshot / Save last 90 s (Xbox) / Record... buttons on the console tabs. Files go to Folder\\<date>\\<kit>_<time>.png/.mp4 (empty Folder = Captures in the tool folder). MaxMinutes = default 'Stop after' in the Record window (0 = until Stop recording; Xbox records 6 h at most). Resolution / FrameRate = PS5 only (Xbox records at the kit's settings). StopTimeoutSec = how long Stop recording waits before stopping the tool hard. Per platform: ScreenshotOptions (PS5 e.g. /mode:GAME, Xbox e.g. /G = game only or /H = HDR .jxr), VideoOptions (PS5 e.g. /no-connect, /bandwidth:20000), Xbox ClipSeconds = length of Save last ... s (6-300). Xbox Record uses the GDK's own live capture (like Xbox Manager's red button) via HYD_XboxRecord.ps1 and the GDK in Xbox.ToolDir; Stop recording finishes the file cleanly. PS5 Stop recording sends Ctrl+C (HYD_CtrlC.ps1).",
+    "Folder": "",
+    "Resolution": "1080p",
+    "FrameRate": 60,
+    "MaxMinutes": 30,
+    "StopTimeoutSec": 20,
+    "Xbox": { "ScreenshotFormat": "png", "ScreenshotOptions": "", "ClipSeconds": 90 },
+    "PS5":  { "ScreenshotFormat": "png", "ScreenshotOptions": "", "VideoOptions": "" },
+    "_pc": "PC tab screen capture with ffmpeg (6.0 or newer). Ffmpeg = full path to ffmpeg.exe (empty = ffmpeg.exe in the tool folder, its ffmpeg\\bin folder, or on PATH). Method: auto (Desktop Duplication when ffmpeg has it) or gdigrab. Encoder: auto (NVIDIA h264_nvenc, AMD h264_amf, Intel h264_qsv, else libx264 on the CPU) or one of those. Size: Native, 1080p or 720p. AudioDevice: the sound OUTPUT to record (name as in Windows Sound settings, e.g. 'Speakers (Realtek(R) Audio)') until a pick is made in the Sound list on the PC tab (then remembered in PcCaptureAudio.txt); empty = no sound.",
+    "PC": { "Ffmpeg": "", "Method": "auto", "Encoder": "auto", "Size": "Native", "ShowMouse": false, "AudioDevice": "" }
+  },
+
+  "BuildLibrary": {
+    "_readme": "Scan finds builds in Root\\<Branch>\\<Config>\\<Platform folder>. Branches / Configs fill the drop-downs. PackageConfigs are package builds (others are loose). PS5RmOnly = start with 'RM only' ticked. MaxBuilds = how many newest builds to list.",
+    "Root": "\\\\eahy-nas01.ad.ea.com\\BF",
+    "Branches": ["CH1-Content Dev", "CH1-QOL", "CH1-Release", "CH1-Stage"],
+    "Configs": ["Combine Retail", "Files Final", "Files Performance"],
+    "PackageConfigs": ["Combine Retail"],
+    "PlatformFolders": { "Xbox": "XBSX", "PS5": "PS5", "PC": "PC" },
+    "PS5RmOnly": true,
+    "MaxBuilds": 40
+  },
+
+
+  "Xbox": {
+    "ToolDir": "C:\\Program Files (x86)\\Microsoft GDK\\bin",
+    "_launch": "Launch game... on this tab and Launch after deploy use the parameters of the build type picked there (Use This Build sets the type from the Config). Args = default launch parameters per type; they go into {LaunchArgs} of the Launch / LaunchLoose commands (added at the end if a command has no {LaunchArgs}). Your own changes and presets are remembered in XboxLaunch.json.",
+    "_findApp": "Package builds have no MicrosoftGame.config, so before launching the tool runs ListApps on the kit and takes the launch ID (AppIdRegex) of the package picked on the tab. With no build picked it takes the ONE installed app matching FindApp (stops if several match). Setting Values.LaunchId skips all this.",
+    "Launch": {
+      "_quoteArgs": "true = the launch parameters reach xbapp as ONE argument (quoted when they contain spaces), the same as the XBDEPLOY tool. false = passed as separate words.",
+      "QuoteArgs": true,
+      "FindApp": "(?i)glacier|battlefield",
+      "AppIdRegex": "([A-Za-z0-9][A-Za-z0-9.\\-]*_[0-9a-z]{13}![A-Za-z0-9._\\-]+)",
+      "Profiles": [
+        { "Type": "Combine Retail",    "Args": "" },
+        { "Type": "Files Final",       "Args": "" },
+        { "Type": "Files Performance", "Args": "" }
+      ]
+    },
+    "_values": "PackageFamilyName is read from the build (package file name, or MicrosoftGame.config for loose). LaunchId is read from MicrosoftGame.config for loose builds; for packages set it here (PackageFamilyName!AppId) to use Launch after deploy.",
+    "Values": {
+      "LaunchId": "",
+      "PackageFamilyName": ""
+    },
+    "Steps": {
+      "Reboot":         { "Exe": "xbreboot.exe", "Args": "/X:{IP}" },
+      "CheckAlwaysOn":  { "Exe": "xbconfig.exe", "Args": "AlwaysOn /X:{IP}" },
+      "DisableAlwaysOn": { "Exe": "xbconfig.exe", "Args": "AlwaysOn=false /X:{IP}" },
+      "EnableAlwaysOn":  { "Exe": "xbconfig.exe", "Args": "AlwaysOn=true /X:{IP}" },
+      "PowerOff":       { "Exe": "xbreboot.exe", "Args": "/S /X:{IP}", "OkOutput": "Shutting down" },
+      "PowerOn":        { "Exe": "WOL", "Args": "" },
+      "Connect":        { "Exe": "", "Args": "" },
+      "Uninstall":      { "Exe": "xbapp.exe", "Args": "uninstall {PackageFamilyName} /X:{IP}" },
+      "DeployLoose":    { "Exe": "xbapp.exe", "Args": "deploy \"{BuildPath}\" /X:{IP}" },
+      "InstallPackage": { "Exe": "xbapp.exe", "Args": "install \"{BuildPath}\" /X:{IP}" },
+      "Launch":         { "Exe": "xbapp.exe", "Args": "launch /X:{IP} {LaunchId} {LaunchArgs}" },
+      "_listApps": "Used to find the launch ID on the kit when the build cannot give it (package builds, or no build picked): see Xbox.Launch.FindApp.",
+      "ListApps":       { "Exe": "xbapp.exe", "Args": "list /X:{IP}" },
+      "_capture": "Screenshot / Save last N s on the Xbox tab (xbcapture). {File} = file in Capture.Folder, {Seconds} = Capture.Xbox.ClipSeconds, {Options} = Capture.Xbox.ScreenshotOptions. Record... uses the GDK live capture (HYD_XboxRecord.ps1), not a command here.",
+      "Screenshot":     { "Exe": "xbcapture.exe", "Args": "\"{File}\" /O {Options} /X:{IP}" },
+      "Clip":           { "Exe": "xbcapture.exe", "Args": "\"{File}\" /C /T:{Seconds} /O {Options} /X:{IP}" },
+      "_terminate": "Close game button in Launch game... (OkOutput: 'not running' counts as done).",
+      "Terminate":      { "Exe": "xbapp.exe", "Args": "terminate /X:{IP} {LaunchId}", "OkOutput": "(?i)not running" }
+    }
+  },
+
+  "PS5": {
+    "_launch": "Launch game... on this tab and Launch after deploy use the parameters of the build type picked there (Use This Build sets the type from the Config). Args = default launch parameters per type; they go into {LaunchArgs} of the Launch / LaunchLoose commands (added at the end if a command has no {LaunchArgs}). Your own changes and presets are remembered in PS5Launch.json.",
+    "Launch": {
+      "_quoteArgs": "false = every parameter is its own argument after /args (what application start expects). Put quotes around a single value that contains spaces.",
+      "QuoteArgs": false,
+      "_argsPrefix": "Put in front of the launch parameters (only when there are some). application start needs /args.",
+      "ArgsPrefix": "/args",
+      "_titleId": "Title ID used to launch when none is typed in Launch game... and no package is picked on the PS5 tab (Glacier = PPSA19534, as in BF Deploy). A picked package's own Title ID always wins.",
+      "TitleId": "PPSA19534",
+      "_readWorkspace": "true = with the Workspace box in Launch game... empty, read each kit's workspaces right before launching: the PS5 tab's name (e.g. sce_nolimit playtest) if the kit has it, else the kit's only sce_nolimit workspace. WorkspaceListRegex finds the names in 'workspace list' output (one name per line also works).",
+      "ReadWorkspace": true,
+      "WorkspaceListRegex": "(?im)^\\s*-?\\s*(?:Name|Workspace(?:\\s*Name)?)\\s*:\\s*(.+?)\\s*$",
+      "_from": "From: Package = start the installed package; Workspace = start the build in the deploy workspace (name from the PS5 tab, e.g. sce_nolimit playtest).",
+      "Profiles": [
+        { "Type": "Combine Retail",    "From": "Package",   "Args": "" },
+        { "Type": "Files Final",       "From": "Workspace", "Args": "" },
+        { "Type": "Files Performance", "From": "Workspace", "Args": "" }
+      ]
+    },
+    "ToolDir": "C:\\Program Files (x86)\\SCE\\Prospero\\Tools\\Target Manager Server\\bin",
+    "_values": "TitleId / ContentId are read from the build automatically (package file name or sce_sys\\param.json). Workspace is the default name shown in the app (placeholders {TitleId} {Build} {Stream} {Config} {Name}).",
+    "Values": {
+      "TitleId": "",
+      "ContentId": "",
+      "Workspace": "playtest"
+    },
+    "_workspacePrefix": "Added to the start of every workspace name, e.g. \"sce_nolimit playtest\" (not added twice). Set to \"\" to turn off. \"{Workspace}\" is quoted in the commands because the name contains a space.",
+    "WorkspacePrefix": "sce_nolimit ",
+    "Steps": {
+      "Reboot":         { "Exe": "prospero-ctrl.exe", "Args": "power reboot /target:{IP}" },
+      "PowerOff":       { "Exe": "prospero-ctrl.exe", "Args": "power off /target:{IP}" },
+      "PowerOn":        { "Exe": "prospero-ctrl.exe", "Args": "power on /target:{IP}" },
+      "Connect":        { "Exe": "prospero-ctrl.exe", "Args": "target connect /target:{IP}" },
+      "ForceConnect":   { "Exe": "prospero-ctrl.exe", "Args": "target connect /force /target:{IP}" },
+      "TargetInfo":     { "Exe": "prospero-ctrl.exe", "Args": "target info /target:{IP}" },
+      "Uninstall":      { "Exe": "prospero-ctrl.exe", "Args": "package uninstall {TitleId} /target:{IP}" },
+      "_loose": "Loose builds: CheckWorkspace runs first; CreateWorkspace is skipped when the workspace already exists. Then DeployLooseGp5 (build has a .gp5) or DeployLoose (copy only changed files).",
+      "TargetList":      { "Exe": "prospero-ctrl.exe", "Args": "target list" },
+      "TargetAdd":       { "Exe": "prospero-ctrl.exe", "Args": "target add {IP}" },
+      "CheckWorkspace":  { "Exe": "prospero-ctrl.exe", "Args": "workspace info \"{Workspace}\" /target:{IP}", "NotFoundOutput": "(?i)not found|does not exist|no such|unknown workspace|not exist" },
+      "CreateWorkspace": { "Exe": "prospero-ctrl.exe", "Args": "workspace create \"{Workspace}\" /force /target:{IP}", "OkOutput": "(?i)already exists" },
+      "DeployLoose":     { "Exe": "prospero-ctrl.exe", "Args": "workspace push \"{Workspace}\" \"{BuildPath}\" / /diff:QUICK /sync /target:{IP}" },
+      "DeployLooseGp5": { "Exe": "prospero-ctrl.exe", "Args": "workspace deploy \"{Workspace}\" \"{Gp5}\" /target:{IP}" },
+      "UninstallLoose": { "Exe": "prospero-ctrl.exe", "Args": "workspace destroy \"{Workspace}\" /target:{IP}" },
+      "_launch": "prospero-ctrl application start <titleId> [options] [/target:<target>] [/args <args> ...] (SDK help). Launch = the installed package (Combine Retail). LaunchWorkspace = the build in the deploy workspace (Files Final / Files Performance): the title started with the workspace's files overlaid. Which one a build type uses: PS5.Launch.Profiles From. /args must be LAST, so {LaunchArgs} is at the end and becomes '/args <your parameters>' (PS5.Launch.ArgsPrefix); nothing is added when there are no parameters.",
+      "LaunchWorkspace": { "Exe": "prospero-ctrl.exe", "Args": "application start {TitleId} \"/workspaceOverlay:{Workspace}\" /target:{IP} {LaunchArgs}" },
+      "InstallPackage": { "Exe": "prospero-ctrl.exe", "Args": "package install \"{BuildPath}\" /target:{IP}" },
+      "Launch":         { "Exe": "prospero-ctrl.exe", "Args": "application start {TitleId} /target:{IP} {LaunchArgs}" },
+      "_terminate": "Close game: kills the Title ID typed in Launch game..., else the first app ListApps shows running ('[]' = nothing running). 'not running' answers count as done.",
+      "Terminate":      { "Exe": "prospero-ctrl.exe", "Args": "application kill \"{TitleId}\" /target:{IP}", "OkOutput": "(?i)not running|no application|not found" },
+      "ListApps":       { "Exe": "prospero-ctrl.exe", "Args": "application list /target:{IP}" },
+      "_listWorkspaces": "Used to read the workspace name from the kit (Launch game... Find on kit, and Files Final / Performance launches with an empty Workspace box).",
+      "ListWorkspaces": { "Exe": "prospero-ctrl.exe", "Args": "workspace list /target:{IP}" },
+      "_capture": "Screenshot / Record... on the PS5 tab. {File} = the file in Capture.Folder; {Length} = /length:<n>m or nothing; {Options} = Capture.ScreenshotOptions / VideoOptions.",
+      "Screenshot":     { "Exe": "prospero-ctrl.exe", "Args": "target screenshot \"{File}\" {Options} /target:{IP}" },
+      "Video":          { "Exe": "prospero-ctrl.exe", "Args": "target video \"{File}\" /resolution:{Resolution} /frame-rate:{FrameRate} {Length} {Options} /target:{IP}" }
+    }
+  }
+}

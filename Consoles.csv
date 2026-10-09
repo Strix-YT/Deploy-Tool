@@ -1,0 +1,3 @@
+Name,Platform,IP,Enabled,Idle,Notes
+Varun,Xbox,10.107.157.165,true,true,Known working Xbox
+allkennedy,PS5,10.107.156.255,true,true,Known working PS5 - ownership must be available to this host
